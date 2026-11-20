@@ -274,14 +274,31 @@ def icon_moon(cv, x, y, s, accent):
 
 
 def icon_globe(cv, x, y, s, accent):
-    # Earth with a wedge of missing time.
-    cv.circle(x + 50, y + 50, 38, bytes((46, 134, 193)))
-    cv.circle(x + 50, y + 50, 38, WHITE, fill=False)
-    cv.rect(x + 50, y + 12, 38, 10, GREEN)
-    cv.rect(x + 14, y + 62, 34, 10, GREEN)
-    # Missing wedge: cut a gap in the lower right of the globe.
-    for i in range(20):
-        cv.line(x + 50 + i, y + 52 + i // 2, x + 50 + i, y + 52 + 20, PANEL2, 2)
+    # Earth with a wedge of time missing: green landmasses kept inside
+    # the disc, and a clean slice cut out of the lower-right quadrant,
+    # edged in gold so the missing wedge reads at a glance.
+    import math
+    cx, cy, r = x + 50, y + 50, 38
+    cv.circle(cx, cy, r, bytes((46, 134, 193)))
+    # Landmasses, all kept inside the disc.
+    cv.circle(x + 34, y + 34, 12, GREEN)
+    cv.rect(x + 28, y + 42, 18, 8, GREEN)
+    cv.circle(x + 30, y + 68, 9, GREEN)
+    cv.circle(x + 66, y + 30, 8, GREEN)
+    cv.circle(cx, cy, r, WHITE, fill=False)
+    # Missing wedge: lower-right quadrant, 15 to 60 degrees.
+    a0, a1 = math.radians(15), math.radians(60)
+    for yy in range(cy - r, cy + r + 1):
+        for xx in range(cx - r, cx + r + 1):
+            dx, dy = xx - cx, yy - cy
+            if dx * dx + dy * dy <= r * r and dx > 0 and dy > 0:
+                a = math.atan2(dy, dx)
+                if a0 <= a <= a1:
+                    cv.set(xx, yy, PANEL2)
+    for a in (a0, a1):
+        ex = int(cx + r * math.cos(a))
+        ey = int(cy + r * math.sin(a))
+        cv.line(cx, cy, ex, ey, GOLD, 3)
 
 
 def icon_bat(cv, x, y, s, accent):
